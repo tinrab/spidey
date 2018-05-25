@@ -1,0 +1,31 @@
+version: "3.6"
+
+services:
+  account:
+    build: "./account"
+    ports:
+      - "8000:8080"
+    depends_on:
+      - "account_db"
+  catalog:
+    build: "./catalog"
+    ports:
+      - "8001:8080"
+    depends_on:
+      - "catalog_db"
+      - "catalog_cache"
+  order:
+    build: "./order"
+    ports:
+      - "8002:8080"
+    depends_on:
+      - "order_db"
+
+  account_db:
+    image: "cockroachdb/cockroach:v2.0.2"
+  catalog_db:
+    image: "cockroachdb/cockroach:v2.0.2"
+  catalog_cache:
+    image: "redis:4.0.9"
+  order_db:
+    image: "cockroachdb/cockroach:v2.0.2"
