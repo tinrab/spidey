@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS account (
+  id CHAR(27) PRIMARY KEY,
+  name VARCHAR(24) NOT NULL,
+);
