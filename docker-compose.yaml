@@ -4,7 +4,7 @@ services:
   account:
     build:
       context: "."
-      dockerfile: "./account/Dockerfile"
+      dockerfile: "./account/app.dockerfile"
     ports:
       - "8000:8080"
     depends_on:
@@ -12,10 +12,31 @@ services:
     environment:
       DATABASE_URL: "postgres://spidey:123456@account_db/spidey?sslmode=disable"
 
+  catalog:
+    build:
+      context: "."
+      dockerfile: "./catalog/app.dockerfile"
+    ports:
+      - "8001:8080"
+    depends_on:
+      - "catalog_db"
+    environment:
+      DATABASE_URL: "postgres://spidey:123456@catalog_db/spidey?sslmode=disable"
+
   account_db:
     build:
       context: "./account"
-      dockerfile: "Dockerfile-db"
+      dockerfile: "db.dockerfile"
+    environment:
+      POSTGRES_DB: "spidey"
+      POSTGRES_USER: "spidey"
+      POSTGRES_PASSWORD: "123456"
+    restart: "unless-stopped"
+
+  catalog_db:
+    build:
+      context: "./catalog"
+      dockerfile: "db.dockerfile"
     environment:
       POSTGRES_DB: "spidey"
       POSTGRES_USER: "spidey"

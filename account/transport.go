@@ -27,11 +27,11 @@ func ListenGRPC(s Service, port int) error {
 }
 
 func (s *grpcServer) PostAccount(ctx context.Context, r *pb.PostAccountRequest) (*pb.PostAccountResponse, error) {
-	a, err := s.service.PostAccount(ctx, Account{Name: r.Name})
+	id, err := s.service.PostAccount(ctx, Account{Name: r.Name})
 	if err != nil {
 		return nil, err
 	}
-	return &pb.PostAccountResponse{Id: a.ID, Name: a.Name}, nil
+	return &pb.PostAccountResponse{Id: id}, nil
 }
 
 func (s *grpcServer) GetAccount(ctx context.Context, r *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {

@@ -35,12 +35,12 @@ func (r *PostgresRepository) Ping() error {
 }
 
 func (r *PostgresRepository) PutAccount(ctx context.Context, a Account) error {
-	_, err := r.db.ExecContext(ctx, "INSERT INTO account(id, name) VALUES($1, $2)", a.ID, a.Name)
+	_, err := r.db.ExecContext(ctx, "INSERT INTO accounts(id, name) VALUES($1, $2)", a.ID, a.Name)
 	return err
 }
 
 func (r *PostgresRepository) GetAccountByID(ctx context.Context, id string) (*Account, error) {
-	row := r.db.QueryRowContext(ctx, "SELECT id, name FROM account WHERE id = $1", id)
+	row := r.db.QueryRowContext(ctx, "SELECT id, name FROM accounts WHERE id = $1", id)
 	a := &Account{}
 	if err := row.Scan(&a.ID, &a.Name); err != nil {
 		return nil, err

@@ -7,7 +7,6 @@ message PostAccountRequest {
 
 message PostAccountResponse {
   string id = 1;
-  string name = 2;
 }
 
 message GetAccountRequest {
