@@ -1,0 +1,20 @@
+type Account {
+  id: String!
+  name: String!
+}
+
+type Product {
+  id: String!
+  name: String!
+  description: String!
+  price: Float!
+}
+
+type Query {
+  accounts(skip: Int, take: Int): [Account!]!
+}
+
+type Mutation {
+  createAccount(name: String!): String!
+  createProduct(name: String!, description: String!, price: Float!): String!
+}

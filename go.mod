@@ -7,6 +7,7 @@ require (
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
 	github.com/segmentio/ksuid v0.0.0-20180216234339-801bc4434082
 	github.com/tinrab/retry v0.0.0-20180514045538-e979fd9b1d79
+	github.com/vektah/gqlgen v0.0.0-20180516091824-6b3b338d5f9c
 	golang.org/x/net v0.0.0-20180524181706-dfa909b99c79
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	golang.org/x/text v0.3.0

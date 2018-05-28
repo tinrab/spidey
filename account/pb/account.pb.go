@@ -34,7 +34,7 @@ func (m *PostAccountRequest) Reset()         { *m = PostAccountRequest{} }
 func (m *PostAccountRequest) String() string { return proto.CompactTextString(m) }
 func (*PostAccountRequest) ProtoMessage()    {}
 func (*PostAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_account_d781fd116377228e, []int{0}
+	return fileDescriptor_account_4aee256885274f7b, []int{0}
 }
 func (m *PostAccountRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PostAccountRequest.Unmarshal(m, b)
@@ -63,7 +63,6 @@ func (m *PostAccountRequest) GetName() string {
 
 type PostAccountResponse struct {
 	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -73,7 +72,7 @@ func (m *PostAccountResponse) Reset()         { *m = PostAccountResponse{} }
 func (m *PostAccountResponse) String() string { return proto.CompactTextString(m) }
 func (*PostAccountResponse) ProtoMessage()    {}
 func (*PostAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_account_d781fd116377228e, []int{1}
+	return fileDescriptor_account_4aee256885274f7b, []int{1}
 }
 func (m *PostAccountResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PostAccountResponse.Unmarshal(m, b)
@@ -100,13 +99,6 @@ func (m *PostAccountResponse) GetId() string {
 	return ""
 }
 
-func (m *PostAccountResponse) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
 type GetAccountRequest struct {
 	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -118,7 +110,7 @@ func (m *GetAccountRequest) Reset()         { *m = GetAccountRequest{} }
 func (m *GetAccountRequest) String() string { return proto.CompactTextString(m) }
 func (*GetAccountRequest) ProtoMessage()    {}
 func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_account_d781fd116377228e, []int{2}
+	return fileDescriptor_account_4aee256885274f7b, []int{2}
 }
 func (m *GetAccountRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAccountRequest.Unmarshal(m, b)
@@ -157,7 +149,7 @@ func (m *GetAccountResponse) Reset()         { *m = GetAccountResponse{} }
 func (m *GetAccountResponse) String() string { return proto.CompactTextString(m) }
 func (*GetAccountResponse) ProtoMessage()    {}
 func (*GetAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_account_d781fd116377228e, []int{3}
+	return fileDescriptor_account_4aee256885274f7b, []int{3}
 }
 func (m *GetAccountResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAccountResponse.Unmarshal(m, b)
@@ -191,11 +183,144 @@ func (m *GetAccountResponse) GetName() string {
 	return ""
 }
 
+type Account struct {
+	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Account) Reset()         { *m = Account{} }
+func (m *Account) String() string { return proto.CompactTextString(m) }
+func (*Account) ProtoMessage()    {}
+func (*Account) Descriptor() ([]byte, []int) {
+	return fileDescriptor_account_4aee256885274f7b, []int{4}
+}
+func (m *Account) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Account.Unmarshal(m, b)
+}
+func (m *Account) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Account.Marshal(b, m, deterministic)
+}
+func (dst *Account) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Account.Merge(dst, src)
+}
+func (m *Account) XXX_Size() int {
+	return xxx_messageInfo_Account.Size(m)
+}
+func (m *Account) XXX_DiscardUnknown() {
+	xxx_messageInfo_Account.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Account proto.InternalMessageInfo
+
+func (m *Account) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *Account) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+type GetAccountsRequest struct {
+	Skip                 uint64   `protobuf:"varint,1,opt,name=skip" json:"skip,omitempty"`
+	Take                 uint64   `protobuf:"varint,2,opt,name=take" json:"take,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetAccountsRequest) Reset()         { *m = GetAccountsRequest{} }
+func (m *GetAccountsRequest) String() string { return proto.CompactTextString(m) }
+func (*GetAccountsRequest) ProtoMessage()    {}
+func (*GetAccountsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_account_4aee256885274f7b, []int{5}
+}
+func (m *GetAccountsRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAccountsRequest.Unmarshal(m, b)
+}
+func (m *GetAccountsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAccountsRequest.Marshal(b, m, deterministic)
+}
+func (dst *GetAccountsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAccountsRequest.Merge(dst, src)
+}
+func (m *GetAccountsRequest) XXX_Size() int {
+	return xxx_messageInfo_GetAccountsRequest.Size(m)
+}
+func (m *GetAccountsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAccountsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetAccountsRequest proto.InternalMessageInfo
+
+func (m *GetAccountsRequest) GetSkip() uint64 {
+	if m != nil {
+		return m.Skip
+	}
+	return 0
+}
+
+func (m *GetAccountsRequest) GetTake() uint64 {
+	if m != nil {
+		return m.Take
+	}
+	return 0
+}
+
+type GetAccountsResponse struct {
+	Accounts             []*Account `protobuf:"bytes,1,rep,name=accounts" json:"accounts,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *GetAccountsResponse) Reset()         { *m = GetAccountsResponse{} }
+func (m *GetAccountsResponse) String() string { return proto.CompactTextString(m) }
+func (*GetAccountsResponse) ProtoMessage()    {}
+func (*GetAccountsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_account_4aee256885274f7b, []int{6}
+}
+func (m *GetAccountsResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAccountsResponse.Unmarshal(m, b)
+}
+func (m *GetAccountsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAccountsResponse.Marshal(b, m, deterministic)
+}
+func (dst *GetAccountsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAccountsResponse.Merge(dst, src)
+}
+func (m *GetAccountsResponse) XXX_Size() int {
+	return xxx_messageInfo_GetAccountsResponse.Size(m)
+}
+func (m *GetAccountsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAccountsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetAccountsResponse proto.InternalMessageInfo
+
+func (m *GetAccountsResponse) GetAccounts() []*Account {
+	if m != nil {
+		return m.Accounts
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*PostAccountRequest)(nil), "pb.PostAccountRequest")
 	proto.RegisterType((*PostAccountResponse)(nil), "pb.PostAccountResponse")
 	proto.RegisterType((*GetAccountRequest)(nil), "pb.GetAccountRequest")
 	proto.RegisterType((*GetAccountResponse)(nil), "pb.GetAccountResponse")
+	proto.RegisterType((*Account)(nil), "pb.Account")
+	proto.RegisterType((*GetAccountsRequest)(nil), "pb.GetAccountsRequest")
+	proto.RegisterType((*GetAccountsResponse)(nil), "pb.GetAccountsResponse")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -206,117 +331,155 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// AccountClient is the client API for Account service.
+// AccountServiceClient is the client API for AccountService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type AccountClient interface {
+type AccountServiceClient interface {
 	PostAccount(ctx context.Context, in *PostAccountRequest, opts ...grpc.CallOption) (*PostAccountResponse, error)
 	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
+	GetAccounts(ctx context.Context, in *GetAccountsRequest, opts ...grpc.CallOption) (*GetAccountsResponse, error)
 }
 
-type accountClient struct {
+type accountServiceClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewAccountClient(cc *grpc.ClientConn) AccountClient {
-	return &accountClient{cc}
+func NewAccountServiceClient(cc *grpc.ClientConn) AccountServiceClient {
+	return &accountServiceClient{cc}
 }
 
-func (c *accountClient) PostAccount(ctx context.Context, in *PostAccountRequest, opts ...grpc.CallOption) (*PostAccountResponse, error) {
+func (c *accountServiceClient) PostAccount(ctx context.Context, in *PostAccountRequest, opts ...grpc.CallOption) (*PostAccountResponse, error) {
 	out := new(PostAccountResponse)
-	err := c.cc.Invoke(ctx, "/pb.Account/PostAccount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/pb.AccountService/PostAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *accountClient) GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error) {
+func (c *accountServiceClient) GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error) {
 	out := new(GetAccountResponse)
-	err := c.cc.Invoke(ctx, "/pb.Account/GetAccount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/pb.AccountService/GetAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// AccountServer is the server API for Account service.
-type AccountServer interface {
+func (c *accountServiceClient) GetAccounts(ctx context.Context, in *GetAccountsRequest, opts ...grpc.CallOption) (*GetAccountsResponse, error) {
+	out := new(GetAccountsResponse)
+	err := c.cc.Invoke(ctx, "/pb.AccountService/GetAccounts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// AccountServiceServer is the server API for AccountService service.
+type AccountServiceServer interface {
 	PostAccount(context.Context, *PostAccountRequest) (*PostAccountResponse, error)
 	GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error)
+	GetAccounts(context.Context, *GetAccountsRequest) (*GetAccountsResponse, error)
 }
 
-func RegisterAccountServer(s *grpc.Server, srv AccountServer) {
-	s.RegisterService(&_Account_serviceDesc, srv)
+func RegisterAccountServiceServer(s *grpc.Server, srv AccountServiceServer) {
+	s.RegisterService(&_AccountService_serviceDesc, srv)
 }
 
-func _Account_PostAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AccountService_PostAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PostAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServer).PostAccount(ctx, in)
+		return srv.(AccountServiceServer).PostAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.Account/PostAccount",
+		FullMethod: "/pb.AccountService/PostAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServer).PostAccount(ctx, req.(*PostAccountRequest))
+		return srv.(AccountServiceServer).PostAccount(ctx, req.(*PostAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Account_GetAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AccountService_GetAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServer).GetAccount(ctx, in)
+		return srv.(AccountServiceServer).GetAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.Account/GetAccount",
+		FullMethod: "/pb.AccountService/GetAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServer).GetAccount(ctx, req.(*GetAccountRequest))
+		return srv.(AccountServiceServer).GetAccount(ctx, req.(*GetAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Account_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.Account",
-	HandlerType: (*AccountServer)(nil),
+func _AccountService_GetAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccountsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).GetAccounts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.AccountService/GetAccounts",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).GetAccounts(ctx, req.(*GetAccountsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _AccountService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.AccountService",
+	HandlerType: (*AccountServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "PostAccount",
-			Handler:    _Account_PostAccount_Handler,
+			Handler:    _AccountService_PostAccount_Handler,
 		},
 		{
 			MethodName: "GetAccount",
-			Handler:    _Account_GetAccount_Handler,
+			Handler:    _AccountService_GetAccount_Handler,
+		},
+		{
+			MethodName: "GetAccounts",
+			Handler:    _AccountService_GetAccounts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "account.proto",
 }
 
-func init() { proto.RegisterFile("account.proto", fileDescriptor_account_d781fd116377228e) }
+func init() { proto.RegisterFile("account.proto", fileDescriptor_account_4aee256885274f7b) }
 
-var fileDescriptor_account_d781fd116377228e = []byte{
-	// 178 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4d, 0x4c, 0x4e, 0xce,
-	0x2f, 0xcd, 0x2b, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2a, 0x48, 0x52, 0xd2, 0xe0,
-	0x12, 0x0a, 0xc8, 0x2f, 0x2e, 0x71, 0x84, 0x48, 0x04, 0xa5, 0x16, 0x96, 0xa6, 0x16, 0x97, 0x08,
-	0x09, 0x71, 0xb1, 0xe4, 0x25, 0xe6, 0xa6, 0x4a, 0x30, 0x2a, 0x30, 0x6a, 0x70, 0x06, 0x81, 0xd9,
-	0x4a, 0x96, 0x5c, 0xc2, 0x28, 0x2a, 0x8b, 0x0b, 0xf2, 0xf3, 0x8a, 0x53, 0x85, 0xf8, 0xb8, 0x98,
-	0x32, 0x53, 0xa0, 0x0a, 0x99, 0x32, 0x53, 0xe0, 0x5a, 0x99, 0x90, 0xb4, 0x2a, 0x73, 0x09, 0xba,
-	0xa7, 0xa2, 0xdb, 0x81, 0xa6, 0x51, 0xc9, 0x82, 0x4b, 0x08, 0x59, 0x11, 0xf1, 0xc6, 0x1b, 0x75,
-	0x31, 0x72, 0xb1, 0x43, 0xf5, 0x09, 0x39, 0x70, 0x71, 0x23, 0xb9, 0x52, 0x48, 0x4c, 0xaf, 0x20,
-	0x49, 0x0f, 0xd3, 0x83, 0x52, 0xe2, 0x18, 0xe2, 0x10, 0xfb, 0x94, 0x18, 0x84, 0x6c, 0xb9, 0xb8,
-	0x10, 0xee, 0x10, 0x12, 0x05, 0x29, 0xc4, 0x70, 0xbc, 0x94, 0x18, 0xba, 0x30, 0x4c, 0x7b, 0x12,
-	0x1b, 0x38, 0x6c, 0x8d, 0x01, 0x01, 0x00, 0x00, 0xff, 0xff, 0x34, 0xf9, 0xd5, 0x67, 0x6c, 0x01,
-	0x00, 0x00,
+var fileDescriptor_account_4aee256885274f7b = []byte{
+	// 264 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0x3d, 0x4f, 0xc3, 0x30,
+	0x10, 0x6d, 0x42, 0xc4, 0xc7, 0x45, 0x54, 0xe2, 0x2a, 0x4a, 0xd5, 0xa9, 0x32, 0x42, 0x64, 0x21,
+	0x43, 0x59, 0x18, 0x00, 0x95, 0x89, 0x15, 0x99, 0x5f, 0x90, 0xa4, 0x1e, 0xac, 0x8a, 0xd8, 0xf4,
+	0x5c, 0xfe, 0x28, 0x7f, 0x08, 0xc5, 0x31, 0xc1, 0x71, 0x32, 0xb0, 0x9d, 0xde, 0xbd, 0x77, 0xf7,
+	0xde, 0xd9, 0x70, 0x5e, 0x54, 0x95, 0x3a, 0xd4, 0x26, 0xd7, 0x7b, 0x65, 0x14, 0xc6, 0xba, 0x64,
+	0x19, 0xe0, 0x9b, 0x22, 0xf3, 0xd2, 0x36, 0xb8, 0xf8, 0x3c, 0x08, 0x32, 0x88, 0x90, 0xd4, 0xc5,
+	0x87, 0x58, 0x44, 0xab, 0x28, 0x3b, 0xe3, 0xb6, 0x66, 0x37, 0x30, 0xeb, 0x31, 0x49, 0xab, 0x9a,
+	0x04, 0x4e, 0x21, 0x96, 0x5b, 0x47, 0x8c, 0xe5, 0x96, 0x5d, 0xc3, 0xc5, 0xab, 0x08, 0xe7, 0x85,
+	0xa4, 0x07, 0x40, 0x9f, 0x34, 0x3e, 0xaa, 0x73, 0x11, 0x7b, 0x2e, 0xee, 0xe0, 0xc4, 0xc9, 0xfe,
+	0x45, 0x7f, 0xf4, 0x17, 0x91, 0x17, 0x8f, 0x76, 0x52, 0x5b, 0x6d, 0xc2, 0x6d, 0xdd, 0x60, 0xa6,
+	0xd8, 0xb5, 0xea, 0x84, 0xdb, 0x9a, 0x3d, 0xc3, 0xac, 0xa7, 0x76, 0x3e, 0x6f, 0xe1, 0xd4, 0x1d,
+	0x92, 0x16, 0xd1, 0xea, 0x28, 0x4b, 0xd7, 0x69, 0xae, 0xcb, 0xfc, 0x37, 0x4e, 0xd7, 0x5c, 0x7f,
+	0x47, 0x30, 0x75, 0xe8, 0xbb, 0xd8, 0x7f, 0xc9, 0x4a, 0xe0, 0x06, 0x52, 0xef, 0x8a, 0x38, 0x6f,
+	0x84, 0xc3, 0x07, 0x58, 0x5e, 0x0d, 0xf0, 0x76, 0x37, 0x9b, 0xe0, 0x13, 0xc0, 0x9f, 0x29, 0xbc,
+	0x6c, 0x88, 0x83, 0x83, 0x2f, 0xe7, 0x21, 0xdc, 0xc9, 0x37, 0x90, 0x7a, 0x99, 0x30, 0x20, 0x52,
+	0xcf, 0xc0, 0x48, 0x78, 0x36, 0x29, 0x8f, 0xed, 0xef, 0xb9, 0xff, 0x09, 0x00, 0x00, 0xff, 0xff,
+	0xaf, 0x0d, 0xa6, 0x4e, 0x4e, 0x02, 0x00, 0x00,
 }

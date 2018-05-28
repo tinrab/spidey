@@ -9,6 +9,7 @@ import (
 type Service interface {
 	PostAccount(ctx context.Context, a Account) (string, error)
 	GetAccount(ctx context.Context, id string) (*Account, error)
+	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 }
 
 type Account struct {
@@ -34,4 +35,11 @@ func (s *accountService) PostAccount(ctx context.Context, a Account) (string, er
 
 func (s *accountService) GetAccount(ctx context.Context, id string) (*Account, error) {
 	return s.repository.GetAccountByID(ctx, id)
+}
+
+func (s *accountService) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error) {
+	if take > 100 {
+		take = 100
+	}
+	return s.repository.ListAccounts(ctx, skip, take)
 }

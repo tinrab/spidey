@@ -18,7 +18,22 @@ message GetAccountResponse {
   string name = 2;
 }
 
-service Account {
+message Account {
+  string id = 1;
+  string name = 2;
+}
+
+message GetAccountsRequest {
+  uint64 skip = 1;
+  uint64 take = 2;
+}
+
+message GetAccountsResponse {
+  repeated Account accounts = 1;
+}
+
+service AccountService {
   rpc PostAccount (PostAccountRequest) returns (PostAccountResponse) {}
   rpc GetAccount (GetAccountRequest) returns (GetAccountResponse) {}
+  rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse) {}
 }

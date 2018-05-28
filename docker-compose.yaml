@@ -5,8 +5,6 @@ services:
     build:
       context: "."
       dockerfile: "./account/app.dockerfile"
-    ports:
-      - "8000:8080"
     depends_on:
       - "account_db"
     environment:
@@ -16,17 +14,25 @@ services:
     build:
       context: "."
       dockerfile: "./catalog/app.dockerfile"
-    ports:
-      - "8001:8080"
     depends_on:
       - "catalog_db"
     environment:
       DATABASE_URL: "postgres://spidey:123456@catalog_db/spidey?sslmode=disable"
 
+  graphql:
+    build:
+      context: "."
+      dockerfile: "./graphql/app.dockerfile"
+    ports:
+      - "8000:8080"
+    environment:
+      ACCOUNT_SERVICE_URL: "account:8080"
+      CATALOG_SERVICE_URL: "catalog:8080"
+
   account_db:
     build:
       context: "./account"
-      dockerfile: "db.dockerfile"
+      dockerfile: "./db.dockerfile"
     environment:
       POSTGRES_DB: "spidey"
       POSTGRES_USER: "spidey"
@@ -36,7 +42,17 @@ services:
   catalog_db:
     build:
       context: "./catalog"
-      dockerfile: "db.dockerfile"
+      dockerfile: "./db.dockerfile"
+    environment:
+      POSTGRES_DB: "spidey"
+      POSTGRES_USER: "spidey"
+      POSTGRES_PASSWORD: "123456"
+    restart: "unless-stopped"
+
+  order_db:
+    build:
+      context: "./order"
+      dockerfile: "./db.dockerfile"
     environment:
       POSTGRES_DB: "spidey"
       POSTGRES_USER: "spidey"
