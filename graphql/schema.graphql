@@ -11,10 +11,11 @@ type Product {
 }
 
 type Query {
-  accounts(skip: Int, take: Int): [Account!]!
+  accounts(skip: Int, take: Int, id: String): [Account!]!
+  products(skip: Int, take: Int, id: String): [Product!]!
 }
 
 type Mutation {
-  createAccount(name: String!): String!
-  createProduct(name: String!, description: String!, price: Float!): String!
+  createAccount(name: String!): Account
+  createProduct(name: String!, description: String!, price: Float!): Product
 }

@@ -38,7 +38,7 @@ func (r *PostgresRepository) Ping() error {
 func (r *PostgresRepository) PutProduct(ctx context.Context, p Product) error {
 	_, err := r.db.ExecContext(
 		ctx,
-		"INSERT INTO products(id, name, description, price)",
+		"INSERT INTO products(id, name, description, price) VALUES($1, $2, $3, $4)",
 		p.ID,
 		p.Name,
 		p.Description,

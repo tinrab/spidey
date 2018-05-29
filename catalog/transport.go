@@ -21,13 +21,13 @@ func ListenGRPC(s Service, port int) error {
 		return err
 	}
 	serv := grpc.NewServer()
-	pb.RegisterCatalogServer(serv, &grpcServer{s})
+	pb.RegisterCatalogServiceServer(serv, &grpcServer{s})
 	reflection.Register(serv)
 	return serv.Serve(lis)
 }
 
 func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) (*pb.PostProductResponse, error) {
-	id, err := s.service.PostProduct(
+	p, err := s.service.PostProduct(
 		ctx,
 		Product{
 			Name:        r.Name,
@@ -37,15 +37,27 @@ func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) 
 	if err != nil {
 		return nil, err
 	}
-	return &pb.PostProductResponse{Id: id}, nil
+	return &pb.PostProductResponse{Product: &pb.Product{
+		Id:          p.ID,
+		Name:        p.Name,
+		Description: p.Description,
+		Price:       p.Price,
+	}}, nil
 }
 
-func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*pb.Product, error) {
+func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*pb.GetProductResponse, error) {
 	p, err := s.service.GetProduct(ctx, r.Id)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.Product{Id: p.ID, Name: p.Name, Description: p.Description, Price: p.Price}, nil
+	return &pb.GetProductResponse{
+		Product: &pb.Product{
+			Id:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Price:       p.Price,
+		},
+	}, nil
 }
 
 func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {

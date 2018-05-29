@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	PostAccount(ctx context.Context, a Account) (string, error)
+	PostAccount(ctx context.Context, a Account) (*Account, error)
 	GetAccount(ctx context.Context, id string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 }
@@ -25,12 +25,12 @@ func NewService(r Repository) Service {
 	return &accountService{r}
 }
 
-func (s *accountService) PostAccount(ctx context.Context, a Account) (string, error) {
+func (s *accountService) PostAccount(ctx context.Context, a Account) (*Account, error) {
 	a.ID = ksuid.New().String()
 	if err := s.repository.PutAccount(ctx, a); err != nil {
-		return "", err
+		return nil, err
 	}
-	return a.ID, nil
+	return &Account{ID: a.ID, Name: a.Name}, nil
 }
 
 func (s *accountService) GetAccount(ctx context.Context, id string) (*Account, error) {

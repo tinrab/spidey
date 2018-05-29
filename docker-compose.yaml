@@ -25,6 +25,9 @@ services:
       dockerfile: "./graphql/app.dockerfile"
     ports:
       - "8000:8080"
+    depends_on:
+      - "account"
+      - "catalog"
     environment:
       ACCOUNT_SERVICE_URL: "account:8080"
       CATALOG_SERVICE_URL: "catalog:8080"

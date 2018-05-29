@@ -1,12 +1,17 @@
 syntax = "proto3";
 package pb;
 
+message Account {
+  string id = 1;
+  string name = 2;
+}
+
 message PostAccountRequest {
   string name = 1;
 }
 
 message PostAccountResponse {
-  string id = 1;
+  Account account = 1;
 }
 
 message GetAccountRequest {
@@ -14,13 +19,7 @@ message GetAccountRequest {
 }
 
 message GetAccountResponse {
-  string id = 1;
-  string name = 2;
-}
-
-message Account {
-  string id = 1;
-  string name = 2;
+  Account account = 1;
 }
 
 message GetAccountsRequest {

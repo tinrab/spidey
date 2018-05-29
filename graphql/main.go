@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s, err := graph.NewGraphQLServer(cfg.AccountURL)
+	s, err := graph.NewGraphQLServer(cfg.AccountURL, cfg.CatalogURL)
 	if err != nil {
 		log.Fatal(err)
 	}

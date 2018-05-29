@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	PostProduct(ctx context.Context, p Product) (string, error)
+	PostProduct(ctx context.Context, p Product) (*Product, error)
 	GetProduct(ctx context.Context, id string) (*Product, error)
 	GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 }
@@ -27,12 +27,17 @@ func NewService(r Repository) Service {
 	return &catalogService{r}
 }
 
-func (s *catalogService) PostProduct(ctx context.Context, p Product) (string, error) {
+func (s *catalogService) PostProduct(ctx context.Context, p Product) (*Product, error) {
 	p.ID = ksuid.New().String()
 	if err := s.repository.PutProduct(ctx, p); err != nil {
-		return "", err
+		return nil, err
 	}
-	return p.ID, nil
+	return &Product{
+		ID:          p.ID,
+		Name:        p.Name,
+		Description: p.Description,
+		Price:       p.Price,
+	}, nil
 }
 
 func (s *catalogService) GetProduct(ctx context.Context, id string) (*Product, error) {

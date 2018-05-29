@@ -18,10 +18,11 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	Mutation_createAccount(ctx context.Context, name string) (string, error)
-	Mutation_createProduct(ctx context.Context, name string, description string, price float64) (string, error)
+	Mutation_createAccount(ctx context.Context, name string) (*Account, error)
+	Mutation_createProduct(ctx context.Context, name string, description string, price float64) (*Product, error)
 
-	Query_accounts(ctx context.Context, skip *int, take *int) ([]Account, error)
+	Query_accounts(ctx context.Context, skip *int, take *int, id *string) ([]Account, error)
+	Query_products(ctx context.Context, skip *int, take *int, id *string) ([]Product, error)
 }
 
 type executableSchema struct {
@@ -179,8 +180,11 @@ func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
-	return graphql.MarshalString(res)
+	res := resTmp.(*Account)
+	if res == nil {
+		return graphql.Null
+	}
+	return ec._Account(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createProduct(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -232,8 +236,11 @@ func (ec *executionContext) _Mutation_createProduct(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
-	return graphql.MarshalString(res)
+	res := resTmp.(*Product)
+	if res == nil {
+		return graphql.Null
+	}
+	return ec._Product(ctx, field.Selections, res)
 }
 
 var productImplementors = []string{"Product"}
@@ -328,6 +335,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = graphql.MarshalString("Query")
 		case "accounts":
 			out.Values[i] = ec._Query_accounts(ctx, field)
+		case "products":
+			out.Values[i] = ec._Query_products(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
 		case "__type":
@@ -372,6 +381,21 @@ func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.C
 		}
 	}
 	args["take"] = arg1
+	var arg2 *string
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["id"] = arg2
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -387,7 +411,7 @@ func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.C
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_accounts(ctx, args["skip"].(*int), args["take"].(*int))
+			return ec.resolvers.Query_accounts(ctx, args["skip"].(*int), args["take"].(*int), args["id"].(*string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -404,6 +428,91 @@ func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.C
 				rctx.PushIndex(idx1)
 				defer rctx.Pop()
 				return ec._Account(ctx, field.Selections, &res[idx1])
+			}())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Query_products(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := field.Args["skip"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["skip"] = arg0
+	var arg1 *int
+	if tmp, ok := field.Args["take"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["take"] = arg1
+	var arg2 *string
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["id"] = arg2
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_products(ctx, args["skip"].(*int), args["take"].(*int), args["id"].(*string))
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Product)
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler {
+				rctx := graphql.GetResolverContext(ctx)
+				rctx.PushIndex(idx1)
+				defer rctx.Pop()
+				return ec._Product(ctx, field.Selections, &res[idx1])
 			}())
 		}
 		return arr1
@@ -1200,11 +1309,12 @@ type Product {
 }
 
 type Query {
-  accounts(skip: Int, take: Int): [Account!]!
+  accounts(skip: Int, take: Int, id: String): [Account!]!
+  products(skip: Int, take: Int, id: String): [Product!]!
 }
 
 type Mutation {
-  createAccount(name: String!): String!
-  createProduct(name: String!, description: String!, price: Float!): String!
+  createAccount(name: String!): Account
+  createProduct(name: String!, description: String!, price: Float!): Product
 }
 `)
