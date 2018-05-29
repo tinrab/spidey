@@ -9,7 +9,6 @@ import (
 
 type Repository interface {
 	Close()
-	Ping() error
 	PutAccount(ctx context.Context, a Account) error
 	GetAccountByID(ctx context.Context, id string) (*Account, error)
 	ListAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
@@ -21,6 +20,10 @@ type PostgresRepository struct {
 
 func NewPostgresRepository(url string) (Repository, error) {
 	db, err := sql.Open("postgres", url)
+	if err != nil {
+		return nil, err
+	}
+	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}

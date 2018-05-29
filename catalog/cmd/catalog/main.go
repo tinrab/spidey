@@ -23,9 +23,6 @@ func main() {
 	var r catalog.Repository
 	retry.ForeverSleep(2*time.Second, func(_ int) (err error) {
 		r, err = catalog.NewPostgresRepository(cfg.DatabaseURL)
-		if err == nil {
-			err = r.Ping()
-		}
 		if err != nil {
 			log.Println(err)
 		}
