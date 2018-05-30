@@ -9,7 +9,7 @@ import (
 type Service interface {
 	PostProduct(ctx context.Context, p Product) (*Product, error)
 	GetProduct(ctx context.Context, id string) (*Product, error)
-	GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
+	GetProducts(ctx context.Context, skip uint64, take uint64, ids []string) ([]Product, error)
 }
 
 type Product struct {
@@ -44,9 +44,13 @@ func (s *catalogService) GetProduct(ctx context.Context, id string) (*Product, e
 	return s.repository.GetProductByID(ctx, id)
 }
 
-func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error) {
+func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string) ([]Product, error) {
 	if take > 100 {
 		take = 100
 	}
-	return s.repository.ListProducts(ctx, skip, take)
+	if len(ids) == 0 {
+		return s.repository.ListProducts(ctx, skip, take)
+	} else {
+		return s.repository.ListProductsWithIDs(ctx, skip, take, ids)
+	}
 }

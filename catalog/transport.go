@@ -61,7 +61,7 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*
 }
 
 func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
-	res, err := s.service.GetProducts(ctx, r.Skip, r.Take)
+	res, err := s.service.GetProducts(ctx, r.Skip, r.Take, r.Ids)
 	if err != nil {
 		return nil, err
 	}

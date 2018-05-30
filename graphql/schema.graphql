@@ -1,3 +1,5 @@
+scalar Time
+
 type Account {
   id: String!
   name: String!
@@ -8,6 +10,14 @@ type Product {
   name: String!
   description: String!
   price: Float!
+}
+
+type Order {
+  id: String!
+  createdAt: Time!
+  totalPrice: Float
+  account: Account
+  products(skip: Int, take: Int): [Product!]!
 }
 
 type Query {

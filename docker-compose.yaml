@@ -19,6 +19,15 @@ services:
     environment:
       DATABASE_URL: "postgres://spidey:123456@catalog_db/spidey?sslmode=disable"
 
+  order:
+    build:
+      context: "."
+      dockerfile: "./order/app.dockerfile"
+    depends_on:
+      - "order_db"
+    environment:
+      DATABASE_URL: "postgres://spidey:123456@order_db/spidey?sslmode=disable"
+
   graphql:
     build:
       context: "."

@@ -29,6 +29,7 @@ message GetProductResponse {
 message GetProductsRequest {
   uint64 skip = 1;
   uint64 take = 2;
+  repeated string ids = 3;
 }
 
 message GetProductsResponse {

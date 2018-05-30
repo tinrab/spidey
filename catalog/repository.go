@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -12,9 +13,10 @@ type Repository interface {
 	PutProduct(ctx context.Context, p Product) error
 	GetProductByID(ctx context.Context, id string) (*Product, error)
 	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
+	ListProductsWithIDs(ctx context.Context, skip uint64, take uint64, ids []string) ([]Product, error)
 }
 
-type PostgresRepository struct {
+type postgresRepository struct {
 	db *sql.DB
 }
 
@@ -27,18 +29,14 @@ func NewPostgresRepository(url string) (Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &PostgresRepository{db}, nil
+	return &postgresRepository{db}, nil
 }
 
-func (r *PostgresRepository) Close() {
+func (r *postgresRepository) Close() {
 	r.db.Close()
 }
 
-func (r *PostgresRepository) Ping() error {
-	return r.db.Ping()
-}
-
-func (r *PostgresRepository) PutProduct(ctx context.Context, p Product) error {
+func (r *postgresRepository) PutProduct(ctx context.Context, p Product) error {
 	_, err := r.db.ExecContext(
 		ctx,
 		"INSERT INTO products(id, name, description, price) VALUES($1, $2, $3, $4)",
@@ -50,8 +48,12 @@ func (r *PostgresRepository) PutProduct(ctx context.Context, p Product) error {
 	return err
 }
 
-func (r *PostgresRepository) GetProductByID(ctx context.Context, id string) (*Product, error) {
-	row := r.db.QueryRowContext(ctx, "SELECT id, name, description, price FROM products WHERE id = $1", id)
+func (r *postgresRepository) GetProductByID(ctx context.Context, id string) (*Product, error) {
+	row := r.db.QueryRowContext(
+		ctx,
+		"SELECT id, name, description, price FROM products WHERE id = $1",
+		id,
+	)
 	p := &Product{}
 	if err := row.Scan(&p.ID, &p.Name, &p.Description, &p.Price); err != nil {
 		return nil, err
@@ -59,7 +61,7 @@ func (r *PostgresRepository) GetProductByID(ctx context.Context, id string) (*Pr
 	return p, nil
 }
 
-func (r *PostgresRepository) ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error) {
+func (r *postgresRepository) ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
 		"SELECT id, name, description, price FROM products ORDER BY id DESC OFFSET $1 LIMIT $2",
@@ -81,5 +83,46 @@ func (r *PostgresRepository) ListProducts(ctx context.Context, skip uint64, take
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+	return products, nil
+}
+
+func (r *postgresRepository) ListProductsWithIDs(ctx context.Context, skip uint64, take uint64, ids []string) ([]Product, error) {
+	// Make ID list
+	idList := strings.Builder{}
+	for i, id := range ids {
+		idList.WriteString("\"" + id + "\"")
+		if i < len(ids)-1 {
+			idList.WriteString(",")
+		}
+	}
+
+	rows, err := r.db.QueryContext(
+		ctx,
+		`SELECT id, name, description, price
+     FROM products
+     WHERE id IN($1)
+     ORDER BY id DESC
+     OFFSET $2 LIMIT $3`,
+		idList.String(),
+		skip,
+		take,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	products := []Product{}
+	for rows.Next() {
+		p := Product{}
+		if err = rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price); err == nil {
+			products = append(products, p)
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return products, nil
 }
