@@ -13,7 +13,7 @@ type Repository interface {
 	PutProduct(ctx context.Context, p Product) error
 	GetProductByID(ctx context.Context, id string) (*Product, error)
 	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
-	ListProductsWithIDs(ctx context.Context, skip uint64, take uint64, ids []string) ([]Product, error)
+	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
 }
 
 type postgresRepository struct {
@@ -86,7 +86,7 @@ func (r *postgresRepository) ListProducts(ctx context.Context, skip uint64, take
 	return products, nil
 }
 
-func (r *postgresRepository) ListProductsWithIDs(ctx context.Context, skip uint64, take uint64, ids []string) ([]Product, error) {
+func (r *postgresRepository) ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error) {
 	// Make ID list
 	idList := strings.Builder{}
 	for i, id := range ids {
@@ -101,11 +101,8 @@ func (r *postgresRepository) ListProductsWithIDs(ctx context.Context, skip uint6
 		`SELECT id, name, description, price
      FROM products
      WHERE id IN($1)
-     ORDER BY id DESC
-     OFFSET $2 LIMIT $3`,
+     ORDER BY id DESC`,
 		idList.String(),
-		skip,
-		take,
 	)
 
 	if err != nil {

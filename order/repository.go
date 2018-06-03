@@ -66,7 +66,7 @@ func (r *postgresRepository) PutOrder(ctx context.Context, o Order) (err error) 
 	values := []interface{}{}
 	for _, p := range o.Products {
 		placeholders = append(placeholders, "(?,?,?)")
-		values = append(values, p.OrderID, p.ProductID, p.Quantity)
+		values = append(values, o.ID, p.ID, p.Quantity)
 	}
 
 	stmt, err := tx.PrepareContext(

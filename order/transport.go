@@ -8,23 +8,32 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/tinrab/spidey/catalog"
 	"github.com/tinrab/spidey/order/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type grpcServer struct {
-	service Service
+	service       Service
+	catalogClient *catalog.Client
 }
 
-func ListenGRPC(s Service, port int) error {
+func ListenGRPC(s Service, catalogUrl string, port int) error {
+	catalogClient, err := catalog.NewClient(catalogUrl)
+	if err != nil {
+		return err
+	}
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return err
 	}
+
 	serv := grpc.NewServer()
-	pb.RegisterOrderServiceServer(serv, &grpcServer{s})
+	pb.RegisterOrderServiceServer(serv, &grpcServer{s, catalogClient})
 	reflection.Register(serv)
+
 	return serv.Serve(lis)
 }
 
@@ -32,13 +41,43 @@ func (s *grpcServer) PostOrder(
 	ctx context.Context,
 	r *pb.PostOrderRequest,
 ) (*pb.PostOrderResponse, error) {
-	o, err := s.service.PostOrder(
-		ctx,
-		s.decodeOrder(r),
-	)
+	// Get ordered products
+	productIDs := []string{}
+	for _, p := range r.Products {
+		productIDs = append(productIDs, p.ProductId)
+	}
+	orderedProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs)
 	if err != nil {
 		return nil, err
 	}
+
+	products := []OrderedProduct{}
+	totalPrice := 0.0
+	for _, p := range orderedProducts {
+		// Set product if it exists
+		quantity := uint32(0)
+		for _, rp := range r.Products {
+			if rp.ProductId == p.ID {
+				quantity = rp.Quantity
+				break
+			}
+		}
+		if quantity != 0 {
+			products = append(products, OrderedProduct{
+				ID:       p.ID,
+				Quantity: quantity,
+			})
+		}
+
+		// Calculate total price
+		totalPrice += p.Price
+	}
+
+	o, err := s.service.PostOrder(ctx, r.AccountId, totalPrice, products)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.PostOrderResponse{
 		Order: s.encodeOrder(*o),
 	}, nil
@@ -86,8 +125,7 @@ func (s *grpcServer) encodeOrder(o Order) *pb.Order {
 
 	for _, p := range o.Products {
 		op.Products = append(op.Products, &pb.Order_OrderProduct{
-			OrderId:   p.OrderID,
-			ProductId: p.ProductID,
+			ProductId: p.ID,
 			Quantity:  p.Quantity,
 		})
 	}
@@ -96,18 +134,14 @@ func (s *grpcServer) encodeOrder(o Order) *pb.Order {
 
 func (s *grpcServer) decodeOrder(r *pb.PostOrderRequest) Order {
 	o := Order{
-		AccountID:  r.AccountId,
-		TotalPrice: r.TotalPrice,
-		Products:   []Product{},
+		AccountID: r.AccountId,
+		Products:  []OrderedProduct{},
 	}
 
-	buf := bytes.NewReader(r.CreatedAt)
-	binary.Read(buf, binary.LittleEndian, &o.CreatedAt)
-
 	for _, p := range r.Products {
-		o.Products = append(o.Products, Product{
-			ProductID: p.ProductId,
-			Quantity:  p.Quantity,
+		o.Products = append(o.Products, OrderedProduct{
+			ID:       p.ProductId,
+			Quantity: p.Quantity,
 		})
 	}
 	return o

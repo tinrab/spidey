@@ -8,23 +8,22 @@ import (
 )
 
 type Service interface {
-	PostOrder(ctx context.Context, o Order) (*Order, error)
+	PostOrder(ctx context.Context, accountID string, totalPrice float64, products []OrderedProduct) (*Order, error)
 	GetOrder(ctx context.Context, id string) (*Order, error)
 	GetOrdersForAccount(ctx context.Context, accountID string) ([]Order, error)
 }
 
 type Order struct {
-	ID         string    `json:"id"`
-	CreatedAt  time.Time `json:"created_at"`
-	TotalPrice float64   `json:"total_price"`
-	AccountID  string    `json:"account_id"`
-	Products   []Product `json:"products"`
+	ID         string
+	CreatedAt  time.Time
+	TotalPrice float64
+	AccountID  string
+	Products   []OrderedProduct
 }
 
-type Product struct {
-	OrderID   string `json:"order_id"`
-	ProductID string `json:"product_id"`
-	Quantity  uint32 `json:"quantity"`
+type OrderedProduct struct {
+	ID       string
+	Quantity uint32
 }
 
 type orderService struct {
@@ -35,12 +34,22 @@ func NewService(r Repository) Service {
 	return &orderService{r}
 }
 
-func (s orderService) PostOrder(ctx context.Context, o Order) (*Order, error) {
-	o.ID = ksuid.New().String()
-	if err := s.repository.PutOrder(ctx, o); err != nil {
+func (s orderService) PostOrder(
+	ctx context.Context,
+	accountID string,
+	totalPrice float64,
+	products []OrderedProduct,
+) (*Order, error) {
+	o := &Order{
+		ID:         ksuid.New().String(),
+		CreatedAt:  time.Now().UTC(),
+		TotalPrice: totalPrice,
+	}
+	err := s.repository.PutOrder(ctx, *o)
+	if err != nil {
 		return nil, err
 	}
-	return &o, nil
+	return o, nil
 }
 
 func (s orderService) GetOrder(ctx context.Context, id string) (*Order, error) {

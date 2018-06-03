@@ -27,13 +27,7 @@ func ListenGRPC(s Service, port int) error {
 }
 
 func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) (*pb.PostProductResponse, error) {
-	p, err := s.service.PostProduct(
-		ctx,
-		Product{
-			Name:        r.Name,
-			Description: r.Description,
-			Price:       r.Price,
-		})
+	p, err := s.service.PostProduct(ctx, r.Name, r.Description, r.Price)
 	if err != nil {
 		return nil, err
 	}

@@ -21,9 +21,7 @@ message PostOrderRequest {
     uint32 quantity = 3;
   }
 
-  bytes createdAt = 1;
   string accountId = 2;
-  double totalPrice = 3;
   repeated OrderProduct products = 4;
 }
 
