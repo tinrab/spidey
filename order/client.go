@@ -31,7 +31,6 @@ func (c *Client) Close() {
 func (c *Client) PostOrder(
 	ctx context.Context,
 	accountID string,
-	totalPrice float64,
 	products []OrderedProduct,
 ) (*Order, error) {
 	protoProducts := []*pb.PostOrderRequest_OrderProduct{}

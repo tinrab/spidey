@@ -2,6 +2,8 @@ FROM golang:1.10.2-alpine3.7 AS build
 RUN apk --no-cache add gcc g++ make ca-certificates
 WORKDIR /go/src/github.com/tinrab/spidey/order
 COPY vendor ../vendor
+COPY account ../account
+COPY catalog ../catalog
 COPY order ./
 RUN go build -o /go/bin/app ./cmd/order/main.go
 

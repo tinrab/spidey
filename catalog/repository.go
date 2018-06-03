@@ -75,9 +75,9 @@ func (r *postgresRepository) ListProducts(ctx context.Context, skip uint64, take
 
 	products := []Product{}
 	for rows.Next() {
-		p := Product{}
+		p := &Product{}
 		if err = rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price); err == nil {
-			products = append(products, p)
+			products = append(products, *p)
 		}
 	}
 	if err = rows.Err(); err != nil {
@@ -112,9 +112,9 @@ func (r *postgresRepository) ListProductsWithIDs(ctx context.Context, ids []stri
 
 	products := []Product{}
 	for rows.Next() {
-		p := Product{}
+		p := &Product{}
 		if err = rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price); err == nil {
-			products = append(products, p)
+			products = append(products, *p)
 		}
 	}
 	if err = rows.Err(); err != nil {

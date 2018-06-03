@@ -27,6 +27,8 @@ services:
       - "order_db"
     environment:
       DATABASE_URL: "postgres://spidey:123456@order_db/spidey?sslmode=disable"
+      ACCOUNT_SERVICE_URL: "account:8080"
+      CATALOG_SERVICE_URL: "catalog:8080"
 
   graphql:
     build:
@@ -40,6 +42,7 @@ services:
     environment:
       ACCOUNT_SERVICE_URL: "account:8080"
       CATALOG_SERVICE_URL: "catalog:8080"
+      ORDER_SERVICE_URL: "order:8080"
 
   account_db:
     build:

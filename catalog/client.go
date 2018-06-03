@@ -25,13 +25,13 @@ func (c *Client) Close() {
 	c.conn.Close()
 }
 
-func (c *Client) PostProduct(ctx context.Context, p Product) (*Product, error) {
+func (c *Client) PostProduct(ctx context.Context, name, description string, price float64) (*Product, error) {
 	r, err := c.service.PostProduct(
 		ctx,
 		&pb.PostProductRequest{
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
+			Name:        name,
+			Description: description,
+			Price:       price,
 		},
 	)
 	if err != nil {

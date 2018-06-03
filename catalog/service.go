@@ -45,7 +45,7 @@ func (s *catalogService) GetProduct(ctx context.Context, id string) (*Product, e
 }
 
 func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string) ([]Product, error) {
-	if take > 100 {
+	if take > 100 || (skip == 0 && take == 0) {
 		take = 100
 	}
 	if len(ids) == 0 {

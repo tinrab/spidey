@@ -25,10 +25,10 @@ func (c *Client) Close() {
 	c.conn.Close()
 }
 
-func (c *Client) PostAccount(ctx context.Context, a Account) (*Account, error) {
+func (c *Client) PostAccount(ctx context.Context, name string) (*Account, error) {
 	r, err := c.service.PostAccount(
 		ctx,
-		&pb.PostAccountRequest{Name: a.Name},
+		&pb.PostAccountRequest{Name: name},
 	)
 	if err != nil {
 		return nil, err

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/tinrab/spidey/account"
 	"github.com/tinrab/spidey/catalog"
 	"github.com/tinrab/spidey/order/pb"
 	"google.golang.org/grpc"
@@ -16,22 +17,35 @@ import (
 
 type grpcServer struct {
 	service       Service
+	accountClient *account.Client
 	catalogClient *catalog.Client
 }
 
-func ListenGRPC(s Service, catalogUrl string, port int) error {
-	catalogClient, err := catalog.NewClient(catalogUrl)
+func ListenGRPC(s Service, accountURL, catalogURL string, port int) error {
+	accountClient, err := account.NewClient(accountURL)
 	if err != nil {
+		return err
+	}
+
+	catalogClient, err := catalog.NewClient(catalogURL)
+	if err != nil {
+		accountClient.Close()
 		return err
 	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
+		accountClient.Close()
+		catalogClient.Close()
 		return err
 	}
 
 	serv := grpc.NewServer()
-	pb.RegisterOrderServiceServer(serv, &grpcServer{s, catalogClient})
+	pb.RegisterOrderServiceServer(serv, &grpcServer{
+		s,
+		accountClient,
+		catalogClient,
+	})
 	reflection.Register(serv)
 
 	return serv.Serve(lis)
@@ -41,6 +55,12 @@ func (s *grpcServer) PostOrder(
 	ctx context.Context,
 	r *pb.PostOrderRequest,
 ) (*pb.PostOrderResponse, error) {
+	// Check if account exists
+	_, err := s.accountClient.GetAccount(ctx, r.AccountId)
+	if err != nil {
+		return nil, err
+	}
+
 	// Get ordered products
 	productIDs := []string{}
 	for _, p := range r.Products {
@@ -54,7 +74,7 @@ func (s *grpcServer) PostOrder(
 	products := []OrderedProduct{}
 	totalPrice := 0.0
 	for _, p := range orderedProducts {
-		// Set product if it exists
+		// Include product if it exists
 		quantity := uint32(0)
 		for _, rp := range r.Products {
 			if rp.ProductId == p.ID {

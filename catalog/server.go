@@ -4,6 +4,7 @@ package catalog
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/tinrab/spidey/catalog/pb"
@@ -29,6 +30,7 @@ func ListenGRPC(s Service, port int) error {
 func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) (*pb.PostProductResponse, error) {
 	p, err := s.service.PostProduct(ctx, r.Name, r.Description, r.Price)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return &pb.PostProductResponse{Product: &pb.Product{
@@ -42,6 +44,7 @@ func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) 
 func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*pb.GetProductResponse, error) {
 	p, err := s.service.GetProduct(ctx, r.Id)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return &pb.GetProductResponse{
@@ -57,6 +60,7 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*
 func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
 	res, err := s.service.GetProducts(ctx, r.Skip, r.Take, r.Ids)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	products := []*pb.Product{}

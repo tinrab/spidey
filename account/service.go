@@ -41,7 +41,7 @@ func (s *accountService) GetAccount(ctx context.Context, id string) (*Account, e
 }
 
 func (s *accountService) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error) {
-	if take > 100 {
+	if take > 100 || (skip == 0 && take == 0) {
 		take = 100
 	}
 	return s.repository.ListAccounts(ctx, skip, take)

@@ -2,133 +2,90 @@ package graph
 
 import (
 	context "context"
+	"log"
 	time "time"
-
-	accountProto "github.com/tinrab/spidey/account/pb"
-	catalogProto "github.com/tinrab/spidey/catalog/pb"
 )
 
-func (s *GraphQLServer) Order_account(ctx context.Context, obj *Order) (*Account, error) {
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	r, err := s.accountClient.GetAccount(
-		ctx,
-		&accountProto.GetAccountRequest{Id: obj.AccountID},
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &Account{
-		ID:   r.Account.Id,
-		Name: r.Account.Name,
-	}, nil
+func (s *GraphQLServer) Account_orders(ctx context.Context, obj *Account) ([]Order, error) {
+	return nil, nil
 }
 
-func (s *GraphQLServer) Order_products(ctx context.Context, obj *Order, skip *int, take *int) ([]Product, error) {
-	skipValue, takeValue := parseRange(skip, take)
-
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	r, err := s.catalogClient.GetProducts(
-		ctx,
-		&catalogProto.GetProductsRequest{Skip: skipValue, Take: takeValue},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	products := []Product{}
-	for _, a := range r.Products {
-		products = append(
-			products,
-			Product{
-				ID:          a.Id,
-				Name:        a.Name,
-				Description: a.Description,
-				Price:       a.Price,
-			},
-		)
-	}
-
-	return products, nil
+func (s *GraphQLServer) Order_products(ctx context.Context, obj *Order) ([]OrderedProduct, error) {
+	return nil, nil
 }
 
-func (s *GraphQLServer) Query_accounts(ctx context.Context, skip *int, take *int, id *string) ([]Account, error) {
+func (s *GraphQLServer) Query_accounts(ctx context.Context, pagination *PaginationInput, id *string) ([]Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
 	// Get single
 	if id != nil {
-		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-		defer cancel()
-		r, err := s.accountClient.GetAccount(
-			ctx,
-			&accountProto.GetAccountRequest{Id: *id},
-		)
+		r, err := s.accountClient.GetAccount(ctx, *id)
 		if err != nil {
+			log.Println(err)
 			return nil, err
 		}
+
 		return []Account{Account{
-			ID:   r.Account.Id,
-			Name: r.Account.Name,
+			ID:   r.ID,
+			Name: r.Name,
 		}}, nil
 	}
 
-	skipValue, takeValue := parseRange(skip, take)
+	skip, take := uint64(0), uint64(0)
+	if pagination != nil {
+		skip, take = pagination.bounds()
+	}
 
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	r, err := s.accountClient.GetAccounts(
-		ctx,
-		&accountProto.GetAccountsRequest{Skip: skipValue, Take: takeValue},
-	)
+	r, err := s.accountClient.GetAccounts(ctx, skip, take)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	accounts := []Account{}
-	for _, a := range r.Accounts {
-		accounts = append(accounts, Account{ID: a.Id, Name: a.Name})
+	for _, a := range r {
+		accounts = append(accounts, Account{ID: a.ID, Name: a.Name})
 	}
 
 	return accounts, nil
 }
 
-func (s *GraphQLServer) Query_products(ctx context.Context, skip *int, take *int, id *string) ([]Product, error) {
+func (s *GraphQLServer) Query_products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]Product, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
 	// Get single
 	if id != nil {
-		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-		defer cancel()
-		r, err := s.catalogClient.GetProduct(
-			ctx,
-			&catalogProto.GetProductRequest{Id: *id},
-		)
+		r, err := s.catalogClient.GetProduct(ctx, *id)
 		if err != nil {
+			log.Println(err)
 			return nil, err
 		}
 		return []Product{Product{
-			ID:          r.Product.Id,
-			Name:        r.Product.Name,
-			Description: r.Product.Description,
-			Price:       r.Product.Price,
+			ID:          r.ID,
+			Name:        r.Name,
+			Description: r.Description,
+			Price:       r.Price,
 		}}, nil
 	}
 
-	skipValue, takeValue := parseRange(skip, take)
+	skip, take := uint64(0), uint64(0)
+	if pagination != nil {
+		skip, take = pagination.bounds()
+	}
 
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	r, err := s.catalogClient.GetProducts(
-		ctx,
-		&catalogProto.GetProductsRequest{Skip: skipValue, Take: takeValue},
-	)
+	r, err := s.catalogClient.GetProducts(ctx, skip, take, nil)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	products := []Product{}
-	for _, a := range r.Products {
-		products = append(
-			products,
+	for _, a := range r {
+		products = append(products,
 			Product{
-				ID:          a.Id,
+				ID:          a.ID,
 				Name:        a.Name,
 				Description: a.Description,
 				Price:       a.Price,
@@ -139,16 +96,14 @@ func (s *GraphQLServer) Query_products(ctx context.Context, skip *int, take *int
 	return products, nil
 }
 
-func parseRange(skip *int, take *int) (uint64, uint64) {
+func (p PaginationInput) bounds() (uint64, uint64) {
 	skipValue := uint64(0)
 	takeValue := uint64(100)
-
-	if skip != nil {
-		skipValue = uint64(*skip)
+	if p.Skip != nil {
+		skipValue = uint64(*p.Skip)
 	}
-	if take != nil {
-		takeValue = uint64(*take)
+	if p.Take != nil {
+		takeValue = uint64(*p.Take)
 	}
-
 	return skipValue, takeValue
 }

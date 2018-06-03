@@ -12,6 +12,7 @@ import (
 type Config struct {
 	AccountURL string `envconfig:"ACCOUNT_SERVICE_URL"`
 	CatalogURL string `envconfig:"CATALOG_SERVICE_URL"`
+	OrderURL   string `envconfig:"ORDER_SERVICE_URL"`
 }
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s, err := graph.NewGraphQLServer(cfg.AccountURL, cfg.CatalogURL)
+	s, err := graph.NewGraphQLServer(cfg.AccountURL, cfg.CatalogURL, cfg.OrderURL)
 	if err != nil {
 		log.Fatal(err)
 	}

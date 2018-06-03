@@ -2,35 +2,42 @@
 package graph
 
 import (
-	accountProto "github.com/tinrab/spidey/account/pb"
-	catalogProto "github.com/tinrab/spidey/catalog/pb"
-	"google.golang.org/grpc"
+	"github.com/tinrab/spidey/account"
+	"github.com/tinrab/spidey/catalog"
+	"github.com/tinrab/spidey/order"
 )
 
 type GraphQLServer struct {
-	accountConn   *grpc.ClientConn
-	accountClient accountProto.AccountServiceClient
-	catalogClient catalogProto.CatalogServiceClient
+	accountClient *account.Client
+	catalogClient *catalog.Client
+	orderClient   *order.Client
 }
 
-func NewGraphQLServer(accountUrl string, catalogUrl string) (*GraphQLServer, error) {
+func NewGraphQLServer(accountUrl, catalogURL, orderURL string) (*GraphQLServer, error) {
 	// Connect to account service
-	accountConn, err := grpc.Dial(accountUrl, grpc.WithInsecure())
+	accountClient, err := account.NewClient(accountUrl)
 	if err != nil {
 		return nil, err
 	}
-	accountClient := accountProto.NewAccountServiceClient(accountConn)
 
 	// Connect to product service
-	catalogConn, err := grpc.Dial(catalogUrl, grpc.WithInsecure())
+	catalogClient, err := catalog.NewClient(catalogURL)
 	if err != nil {
+		accountClient.Close()
 		return nil, err
 	}
-	catalogClient := catalogProto.NewCatalogServiceClient(catalogConn)
 
-	return &GraphQLServer{accountConn, accountClient, catalogClient}, nil
-}
+	// Connect to order service
+	orderClient, err := order.NewClient(orderURL)
+	if err != nil {
+		accountClient.Close()
+		catalogClient.Close()
+		return nil, err
+	}
 
-func (s *GraphQLServer) Close() {
-	s.accountConn.Close()
+	return &GraphQLServer{
+		accountClient,
+		catalogClient,
+		orderClient,
+	}, nil
 }

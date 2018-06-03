@@ -96,5 +96,28 @@ func (r *postgresRepository) GetOrderByID(ctx context.Context, id string) (*Orde
 }
 
 func (r *postgresRepository) GetOrdersForAccount(ctx context.Context, accountID string) ([]Order, error) {
-	return nil, nil
+	rows, err := r.db.QueryContext(
+		ctx,
+		`SELECT id, created_at, account_id, total_price
+    FROM orders
+    WHERE account_id = $1`,
+		accountID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	orders := []Order{}
+	for rows.Next() {
+		o := &Order{}
+		if err := rows.Scan(&o.ID, &o.CreatedAt, &o.AccountID, &o.TotalPrice); err == nil {
+			orders = append(orders, *o)
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
 }
