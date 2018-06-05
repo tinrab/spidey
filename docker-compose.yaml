@@ -17,7 +17,7 @@ services:
     depends_on:
       - "catalog_db"
     environment:
-      DATABASE_URL: "postgres://spidey:123456@catalog_db/spidey?sslmode=disable"
+      DATABASE_URL: "http://catalog_db:9200"
 
   order:
     build:
@@ -55,14 +55,10 @@ services:
     restart: "unless-stopped"
 
   catalog_db:
-    build:
-      context: "./catalog"
-      dockerfile: "./db.dockerfile"
+    image: "docker.elastic.co/elasticsearch/elasticsearch:6.2.4"
     environment:
-      POSTGRES_DB: "spidey"
-      POSTGRES_USER: "spidey"
-      POSTGRES_PASSWORD: "123456"
-    restart: "unless-stopped"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      discovery.type: "single-node"
 
   order_db:
     build:

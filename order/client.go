@@ -1,9 +1,7 @@
 package order
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
 	"time"
 
 	"github.com/tinrab/spidey/order/pb"
@@ -34,6 +32,12 @@ func (c *Client) PostOrder(
 	products []OrderedProduct,
 ) (*Order, error) {
 	protoProducts := []*pb.PostOrderRequest_OrderProduct{}
+	for _, p := range products {
+		protoProducts = append(protoProducts, &pb.PostOrderRequest_OrderProduct{
+			ProductId: p.ID,
+			Quantity:  p.Quantity,
+		})
+	}
 	r, err := c.service.PostOrder(
 		ctx,
 		&pb.PostOrderRequest{
@@ -48,8 +52,7 @@ func (c *Client) PostOrder(
 	// Create response order
 	newOrder := r.Order
 	newOrderCreatedAt := time.Time{}
-	buf := bytes.NewReader(newOrder.CreatedAt)
-	binary.Read(buf, binary.LittleEndian, &newOrderCreatedAt)
+	newOrderCreatedAt.UnmarshalBinary(newOrder.CreatedAt)
 
 	return &Order{
 		ID:         newOrder.Id,

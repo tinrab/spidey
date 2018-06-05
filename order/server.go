@@ -2,10 +2,9 @@
 package order
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/tinrab/spidey/account"
@@ -58,6 +57,7 @@ func (s *grpcServer) PostOrder(
 	// Check if account exists
 	_, err := s.accountClient.GetAccount(ctx, r.AccountId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -68,6 +68,7 @@ func (s *grpcServer) PostOrder(
 	}
 	orderedProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -88,13 +89,13 @@ func (s *grpcServer) PostOrder(
 				Quantity: quantity,
 			})
 		}
-
 		// Calculate total price
 		totalPrice += p.Price
 	}
 
 	o, err := s.service.PostOrder(ctx, r.AccountId, totalPrice, products)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -109,6 +110,7 @@ func (s *grpcServer) GetOrder(
 ) (*pb.GetOrderResponse, error) {
 	o, err := s.service.GetOrder(ctx, r.Id)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return &pb.GetOrderResponse{
@@ -122,6 +124,7 @@ func (s *grpcServer) GetOrdersForAccount(
 ) (*pb.GetOrdersForAccountResponse, error) {
 	res, err := s.service.GetOrdersForAccount(ctx, r.AccountId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	orders := []*pb.Order{}
@@ -138,10 +141,7 @@ func (s *grpcServer) encodeOrder(o Order) *pb.Order {
 		TotalPrice: o.TotalPrice,
 		Products:   []*pb.Order_OrderProduct{},
 	}
-
-	buf := &bytes.Buffer{}
-	binary.Write(buf, binary.LittleEndian, o.CreatedAt)
-	op.CreatedAt = buf.Bytes()
+	op.CreatedAt, _ = o.CreatedAt.MarshalBinary()
 
 	for _, p := range o.Products {
 		op.Products = append(op.Products, &pb.Order_OrderProduct{

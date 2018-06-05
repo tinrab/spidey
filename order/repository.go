@@ -3,9 +3,8 @@ package order
 import (
 	"context"
 	"database/sql"
-	"strings"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 type Repository interface {
@@ -62,22 +61,18 @@ func (r *postgresRepository) PutOrder(ctx context.Context, o Order) (err error) 
 	}
 
 	// Insert order products
-	placeholders := []string{}
-	values := []interface{}{}
+	stmt, _ := tx.PrepareContext(ctx, pq.CopyIn("order_products", "order_id", "product_id", "quantity"))
 	for _, p := range o.Products {
-		placeholders = append(placeholders, "(?,?,?)")
-		values = append(values, o.ID, p.ID, p.Quantity)
+		_, err = stmt.ExecContext(ctx, o.ID, p.ID, p.Quantity)
+		if err != nil {
+			return
+		}
 	}
-
-	stmt, err := tx.PrepareContext(
-		ctx,
-		"INSERT INTO order_products(order_id, product_id, quantity) VALUES "+
-			strings.Join(placeholders, ","),
-	)
+	_, err = stmt.ExecContext(ctx)
 	if err != nil {
 		return
 	}
-	_, err = stmt.ExecContext(ctx, values...)
+	stmt.Close()
 
 	return
 }

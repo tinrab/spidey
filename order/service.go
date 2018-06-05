@@ -44,6 +44,8 @@ func (s orderService) PostOrder(
 		ID:         ksuid.New().String(),
 		CreatedAt:  time.Now().UTC(),
 		TotalPrice: totalPrice,
+		AccountID:  accountID,
+		Products:   products,
 	}
 	err := s.repository.PutOrder(ctx, *o)
 	if err != nil {

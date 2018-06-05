@@ -2,10 +2,15 @@ package catalog
 
 import (
 	"context"
-	"database/sql"
-	"strings"
+	"encoding/json"
+	"errors"
+	"log"
 
-	_ "github.com/lib/pq"
+	elastic "gopkg.in/olivere/elastic.v5"
+)
+
+var (
+	ErrNotFound = errors.New("Entity not found")
 )
 
 type Repository interface {
@@ -16,110 +21,122 @@ type Repository interface {
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
 }
 
-type postgresRepository struct {
-	db *sql.DB
+type elasticRepository struct {
+	client *elastic.Client
 }
 
-func NewPostgresRepository(url string) (Repository, error) {
-	db, err := sql.Open("postgres", url)
-	if err != nil {
-		return nil, err
-	}
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-	return &postgresRepository{db}, nil
+type productDocument struct {
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
 }
 
-func (r *postgresRepository) Close() {
-	r.db.Close()
-}
-
-func (r *postgresRepository) PutProduct(ctx context.Context, p Product) error {
-	_, err := r.db.ExecContext(
-		ctx,
-		"INSERT INTO products(id, name, description, price) VALUES($1, $2, $3, $4)",
-		p.ID,
-		p.Name,
-		p.Description,
-		p.Price,
+func NewElasticRepository(url string) (Repository, error) {
+	client, err := elastic.NewClient(
+		elastic.SetURL(url),
+		elastic.SetSniff(false),
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &elasticRepository{client}, nil
+}
+
+func (r *elasticRepository) Close() {
+}
+
+func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
+	_, err := r.client.Index().
+		Index("catalog").
+		Type("product").
+		Id(p.ID).
+		BodyJson(productDocument{
+			Name:        p.Name,
+			Description: p.Description,
+			Price:       p.Price,
+		}).
+		Do(ctx)
 	return err
 }
 
-func (r *postgresRepository) GetProductByID(ctx context.Context, id string) (*Product, error) {
-	row := r.db.QueryRowContext(
-		ctx,
-		"SELECT id, name, description, price FROM products WHERE id = $1",
-		id,
-	)
-	p := &Product{}
-	if err := row.Scan(&p.ID, &p.Name, &p.Description, &p.Price); err != nil {
-		return nil, err
-	}
-	return p, nil
-}
-
-func (r *postgresRepository) ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error) {
-	rows, err := r.db.QueryContext(
-		ctx,
-		"SELECT id, name, description, price FROM products ORDER BY id DESC OFFSET $1 LIMIT $2",
-		skip,
-		take,
-	)
+func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Product, error) {
+	res, err := r.client.Get().
+		Index("catalog").
+		Type("product").
+		Id(id).
+		Do(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	products := []Product{}
-	for rows.Next() {
-		p := &Product{}
-		if err = rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price); err == nil {
-			products = append(products, *p)
-		}
+	if !res.Found {
+		return nil, ErrNotFound
 	}
-	if err = rows.Err(); err != nil {
+	p := productDocument{}
+	if err = json.Unmarshal(*res.Source, &p); err != nil {
 		return nil, err
 	}
-	return products, nil
+	return &Product{
+		ID:          id,
+		Name:        p.Name,
+		Description: p.Description,
+		Price:       p.Price,
+	}, err
 }
 
-func (r *postgresRepository) ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error) {
-	// Make ID list
-	idList := strings.Builder{}
-	for i, id := range ids {
-		idList.WriteString("\"" + id + "\"")
-		if i < len(ids)-1 {
-			idList.WriteString(",")
-		}
-	}
-
-	rows, err := r.db.QueryContext(
-		ctx,
-		`SELECT id, name, description, price
-     FROM products
-     WHERE id IN($1)
-     ORDER BY id DESC`,
-		idList.String(),
-	)
-
+func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64) ([]Product, error) {
+	res, err := r.client.Search().
+		Query(elastic.NewMatchAllQuery()).
+		Sort("id", false).
+		From(int(skip)).Size(int(take)).
+		Do(ctx)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
-	defer rows.Close()
-
 	products := []Product{}
-	for rows.Next() {
-		p := &Product{}
-		if err = rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price); err == nil {
-			products = append(products, *p)
+	for _, hit := range res.Hits.Hits {
+		p := productDocument{}
+		if err = json.Unmarshal(*hit.Source, &p); err == nil {
+			products = append(products, Product{
+				ID:          hit.Id,
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+			})
 		}
 	}
-	if err = rows.Err(); err != nil {
+	return products, err
+}
+
+func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error) {
+	items := []*elastic.MultiGetItem{}
+	for _, id := range ids {
+		items = append(
+			items,
+			elastic.NewMultiGetItem().
+				Index("catalog").
+				Type("product").
+				Id(id),
+		)
+	}
+	res, err := r.client.MultiGet().
+		Add(items...).
+		Do(ctx)
+	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
-
+	products := []Product{}
+	for _, doc := range res.Docs {
+		p := productDocument{}
+		if err = json.Unmarshal(*doc.Source, &p); err == nil {
+			products = append(products, Product{
+				ID:          doc.Id,
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+			})
+		}
+	}
 	return products, nil
 }
