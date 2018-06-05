@@ -10,7 +10,6 @@ import (
 type Repository interface {
 	Close()
 	PutOrder(ctx context.Context, o Order) error
-	GetOrderByID(ctx context.Context, id string) (*Order, error)
 	GetOrdersForAccount(ctx context.Context, accountID string) ([]Order, error)
 }
 
@@ -77,25 +76,19 @@ func (r *postgresRepository) PutOrder(ctx context.Context, o Order) (err error) 
 	return
 }
 
-func (r *postgresRepository) GetOrderByID(ctx context.Context, id string) (*Order, error) {
-	row := r.db.QueryRowContext(
-		ctx,
-		"SELECT id, created_at, account_id, total_price FROM orders WHERE id = $1",
-		id,
-	)
-	o := &Order{}
-	if err := row.Scan(&o.ID, &o.CreatedAt, &o.AccountID, &o.TotalPrice); err != nil {
-		return nil, err
-	}
-	return o, nil
-}
-
 func (r *postgresRepository) GetOrdersForAccount(ctx context.Context, accountID string) ([]Order, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
-		`SELECT id, created_at, account_id, total_price
-    FROM orders
-    WHERE account_id = $1`,
+		`SELECT
+      o.id,
+      o.created_at,
+      o.account_id,
+      o.total_price::money::numeric::float8,
+      op.product_id,
+      op.quantity
+    FROM orders o JOIN order_products op ON (o.id = op.order_id)
+    WHERE o.account_id = $1
+    ORDER BY o.id`,
 		accountID,
 	)
 	if err != nil {
@@ -104,12 +97,55 @@ func (r *postgresRepository) GetOrdersForAccount(ctx context.Context, accountID 
 	defer rows.Close()
 
 	orders := []Order{}
+	order := &Order{}
+	lastOrder := &Order{}
+	orderedProduct := &OrderedProduct{}
+	products := []OrderedProduct{}
+
 	for rows.Next() {
-		o := &Order{}
-		if err := rows.Scan(&o.ID, &o.CreatedAt, &o.AccountID, &o.TotalPrice); err == nil {
-			orders = append(orders, *o)
+		if err = rows.Scan(
+			&order.ID,
+			&order.CreatedAt,
+			&order.AccountID,
+			&order.TotalPrice,
+			&orderedProduct.ID,
+			&orderedProduct.Quantity,
+		); err != nil {
+			return nil, err
 		}
+		// Scan order
+		if lastOrder.ID != "" && lastOrder.ID != order.ID {
+			newOrder := Order{
+				ID:         lastOrder.ID,
+				AccountID:  lastOrder.AccountID,
+				CreatedAt:  lastOrder.CreatedAt,
+				TotalPrice: lastOrder.TotalPrice,
+				Products:   products,
+			}
+			orders = append(orders, newOrder)
+			products = []OrderedProduct{}
+		}
+		// Scan products
+		products = append(products, OrderedProduct{
+			ID:       orderedProduct.ID,
+			Quantity: orderedProduct.Quantity,
+		})
+
+		*lastOrder = *order
 	}
+
+	// Add last order (or first lol)
+	if lastOrder != nil {
+		newOrder := Order{
+			ID:         lastOrder.ID,
+			AccountID:  lastOrder.AccountID,
+			CreatedAt:  lastOrder.CreatedAt,
+			TotalPrice: lastOrder.TotalPrice,
+			Products:   products,
+		}
+		orders = append(orders, newOrder)
+	}
+
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}

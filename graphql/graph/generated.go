@@ -23,8 +23,6 @@ type Resolvers interface {
 	Mutation_createProduct(ctx context.Context, product ProductInput) (*Product, error)
 	Mutation_createOrder(ctx context.Context, order OrderInput) (*Order, error)
 
-	Order_products(ctx context.Context, obj *Order) ([]OrderedProduct, error)
-
 	Query_accounts(ctx context.Context, pagination *PaginationInput, id *string) ([]Account, error)
 	Query_products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]Product, error)
 }
@@ -369,42 +367,23 @@ func (ec *executionContext) _Order_totalPrice(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) _Order_products(ctx context.Context, field graphql.CollectedField, obj *Order) graphql.Marshaler {
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Order",
-		Args:   nil,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Order_products(ctx, obj)
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.([]OrderedProduct)
-		arr1 := graphql.Array{}
-		for idx1 := range res {
-			arr1 = append(arr1, func() graphql.Marshaler {
-				rctx := graphql.GetResolverContext(ctx)
-				rctx.PushIndex(idx1)
-				defer rctx.Pop()
-				return ec._OrderedProduct(ctx, field.Selections, &res[idx1])
-			}())
-		}
-		return arr1
-	})
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "Order"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Products
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			rctx := graphql.GetResolverContext(ctx)
+			rctx.PushIndex(idx1)
+			defer rctx.Pop()
+			return ec._OrderedProduct(ctx, field.Selections, &res[idx1])
+		}())
+	}
+	return arr1
 }
 
 var orderedProductImplementors = []string{"OrderedProduct"}

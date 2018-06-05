@@ -3,9 +3,11 @@ package pb;
 
 message Order {
   message OrderProduct {
-    string orderId = 1;
-    string productId = 2;
-    uint32 quantity = 3;
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    uint32 quantity = 5;
   }
 
   string id = 1;
@@ -39,7 +41,6 @@ message GetOrderResponse {
 
 message GetOrdersForAccountRequest {
   string accountId = 1;
-  repeated string ids = 4;
 }
 
 message GetOrdersForAccountResponse {
@@ -48,6 +49,5 @@ message GetOrdersForAccountResponse {
 
 service OrderService {
   rpc PostOrder (PostOrderRequest) returns (PostOrderResponse) {}
-  rpc GetOrder (GetOrderRequest) returns (GetOrderResponse) {}
   rpc GetOrdersForAccount (GetOrdersForAccountRequest) returns (GetOrdersForAccountResponse) {}
 }

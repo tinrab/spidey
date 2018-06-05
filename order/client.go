@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/tinrab/spidey/order/pb"
@@ -61,4 +62,41 @@ func (c *Client) PostOrder(
 		AccountID:  newOrder.AccountId,
 		Products:   products,
 	}, nil
+}
+
+func (c *Client) GetOrdersForAccount(ctx context.Context, accountID string) ([]Order, error) {
+	r, err := c.service.GetOrdersForAccount(ctx, &pb.GetOrdersForAccountRequest{
+		AccountId: accountID,
+	})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	// Create response orders
+	orders := []Order{}
+	for _, orderProto := range r.Orders {
+		newOrder := Order{
+			ID:         orderProto.Id,
+			TotalPrice: orderProto.TotalPrice,
+			AccountID:  orderProto.AccountId,
+		}
+		newOrder.CreatedAt = time.Time{}
+		newOrder.CreatedAt.UnmarshalBinary(orderProto.CreatedAt)
+
+		products := []OrderedProduct{}
+		for _, p := range orderProto.Products {
+			products = append(products, OrderedProduct{
+				ID:          p.Id,
+				Quantity:    p.Quantity,
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+			})
+		}
+		newOrder.Products = products
+
+		orders = append(orders, newOrder)
+	}
+	return orders, nil
 }

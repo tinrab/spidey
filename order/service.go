@@ -9,7 +9,6 @@ import (
 
 type Service interface {
 	PostOrder(ctx context.Context, accountID string, totalPrice float64, products []OrderedProduct) (*Order, error)
-	GetOrder(ctx context.Context, id string) (*Order, error)
 	GetOrdersForAccount(ctx context.Context, accountID string) ([]Order, error)
 }
 
@@ -22,8 +21,11 @@ type Order struct {
 }
 
 type OrderedProduct struct {
-	ID       string
-	Quantity uint32
+	ID          string
+	Name        string
+	Description string
+	Price       float64
+	Quantity    uint32
 }
 
 type orderService struct {
@@ -52,10 +54,6 @@ func (s orderService) PostOrder(
 		return nil, err
 	}
 	return o, nil
-}
-
-func (s orderService) GetOrder(ctx context.Context, id string) (*Order, error) {
-	return s.repository.GetOrderByID(ctx, id)
 }
 
 func (s orderService) GetOrdersForAccount(ctx context.Context, accountID string) ([]Order, error) {

@@ -75,46 +75,50 @@ func (s *grpcServer) PostOrder(
 	products := []OrderedProduct{}
 	totalPrice := 0.0
 	for _, p := range orderedProducts {
-		// Include product if it exists
-		quantity := uint32(0)
+		product := OrderedProduct{
+			ID:       p.ID,
+			Quantity: 0,
+		}
 		for _, rp := range r.Products {
 			if rp.ProductId == p.ID {
-				quantity = rp.Quantity
+				product.Quantity = rp.Quantity
 				break
 			}
 		}
-		if quantity != 0 {
-			products = append(products, OrderedProduct{
-				ID:       p.ID,
-				Quantity: quantity,
-			})
+
+		if product.Quantity != 0 {
+			products = append(products, product)
+			// Calculate total price
+			totalPrice += p.Price * float64(product.Quantity)
 		}
-		// Calculate total price
-		totalPrice += p.Price
 	}
 
-	o, err := s.service.PostOrder(ctx, r.AccountId, totalPrice, products)
+	// Call service
+	order, err := s.service.PostOrder(ctx, r.AccountId, totalPrice, products)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
+	// Make response order
+	orderProto := &pb.Order{
+		Id:         order.ID,
+		AccountId:  order.AccountID,
+		TotalPrice: order.TotalPrice,
+		Products:   []*pb.Order_OrderProduct{},
+	}
+	orderProto.CreatedAt, _ = order.CreatedAt.MarshalBinary()
+	for _, p := range order.Products {
+		orderProto.Products = append(orderProto.Products, &pb.Order_OrderProduct{
+			Id:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Price:       p.Price,
+			Quantity:    p.Quantity,
+		})
+	}
 	return &pb.PostOrderResponse{
-		Order: s.encodeOrder(*o),
-	}, nil
-}
-
-func (s *grpcServer) GetOrder(
-	ctx context.Context,
-	r *pb.GetOrderRequest,
-) (*pb.GetOrderResponse, error) {
-	o, err := s.service.GetOrder(ctx, r.Id)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	return &pb.GetOrderResponse{
-		Order: s.encodeOrder(*o),
+		Order: orderProto,
 	}, nil
 }
 
@@ -122,47 +126,64 @@ func (s *grpcServer) GetOrdersForAccount(
 	ctx context.Context,
 	r *pb.GetOrdersForAccountRequest,
 ) (*pb.GetOrdersForAccountResponse, error) {
-	res, err := s.service.GetOrdersForAccount(ctx, r.AccountId)
+	// Get orders for account
+	accountOrders, err := s.service.GetOrdersForAccount(ctx, r.AccountId)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	// Get all ordered products
+	productIDMap := map[string]bool{}
+	for _, o := range accountOrders {
+		for _, p := range o.Products {
+			productIDMap[p.ID] = true
+		}
+	}
+	productIDs := []string{}
+	for id := range productIDMap {
+		productIDs = append(productIDs, id)
+	}
+	products, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	// Construct orders
 	orders := []*pb.Order{}
-	for _, o := range res {
-		orders = append(orders, s.encodeOrder(o))
+	for _, o := range accountOrders {
+		// Encode order
+		op := &pb.Order{
+			AccountId:  o.AccountID,
+			Id:         o.ID,
+			TotalPrice: o.TotalPrice,
+			Products:   []*pb.Order_OrderProduct{},
+		}
+		op.CreatedAt, _ = o.CreatedAt.MarshalBinary()
+
+		// Decorate orders with products
+		for _, product := range o.Products {
+			// Populate product fields
+			for _, p := range products {
+				if p.ID == product.ID {
+					product.Name = p.Name
+					product.Description = p.Description
+					product.Price = p.Price
+					break
+				}
+			}
+
+			op.Products = append(op.Products, &pb.Order_OrderProduct{
+				Id:          product.ID,
+				Name:        product.Name,
+				Description: product.Description,
+				Price:       product.Price,
+				Quantity:    product.Quantity,
+			})
+		}
+
+		orders = append(orders, op)
 	}
 	return &pb.GetOrdersForAccountResponse{Orders: orders}, nil
-}
-
-func (s *grpcServer) encodeOrder(o Order) *pb.Order {
-	op := &pb.Order{
-		AccountId:  o.AccountID,
-		Id:         o.ID,
-		TotalPrice: o.TotalPrice,
-		Products:   []*pb.Order_OrderProduct{},
-	}
-	op.CreatedAt, _ = o.CreatedAt.MarshalBinary()
-
-	for _, p := range o.Products {
-		op.Products = append(op.Products, &pb.Order_OrderProduct{
-			ProductId: p.ID,
-			Quantity:  p.Quantity,
-		})
-	}
-	return op
-}
-
-func (s *grpcServer) decodeOrder(r *pb.PostOrderRequest) Order {
-	o := Order{
-		AccountID: r.AccountId,
-		Products:  []OrderedProduct{},
-	}
-
-	for _, p := range r.Products {
-		o.Products = append(o.Products, OrderedProduct{
-			ID:       p.ProductId,
-			Quantity: p.Quantity,
-		})
-	}
-	return o
 }
