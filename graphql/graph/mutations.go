@@ -2,10 +2,15 @@ package graph
 
 import (
 	context "context"
+	"errors"
 	"log"
 	time "time"
 
 	"github.com/tinrab/spidey/order"
+)
+
+var (
+	ErrInvalidParameter = errors.New("Invalid parameter")
 )
 
 func (s *GraphQLServer) Mutation_createAccount(ctx context.Context, in AccountInput) (*Account, error) {
@@ -48,6 +53,9 @@ func (s *GraphQLServer) Mutation_createOrder(ctx context.Context, in OrderInput)
 
 	products := []order.OrderedProduct{}
 	for _, p := range in.Products {
+		if p.Quantity <= 0 {
+			return nil, ErrInvalidParameter
+		}
 		products = append(products, order.OrderedProduct{
 			ID:       p.ID,
 			Quantity: uint32(p.Quantity),

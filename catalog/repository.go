@@ -19,6 +19,7 @@ type Repository interface {
 	GetProductByID(ctx context.Context, id string) (*Product, error)
 	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
+	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
 }
 
 type elasticRepository struct {
@@ -140,4 +141,30 @@ func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []strin
 		}
 	}
 	return products, nil
+}
+
+func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64) ([]Product, error) {
+	res, err := r.client.Search().
+		Index("catalog").
+		Type("product").
+		Query(elastic.NewMultiMatchQuery(query, "name", "description")).
+		From(int(skip)).Size(int(take)).
+		Do(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	products := []Product{}
+	for _, hit := range res.Hits.Hits {
+		p := productDocument{}
+		if err = json.Unmarshal(*hit.Source, &p); err == nil {
+			products = append(products, Product{
+				ID:          hit.Id,
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+			})
+		}
+	}
+	return products, err
 }

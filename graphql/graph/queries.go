@@ -104,7 +104,11 @@ func (s *GraphQLServer) Query_products(ctx context.Context, pagination *Paginati
 		skip, take = pagination.bounds()
 	}
 
-	r, err := s.catalogClient.GetProducts(ctx, skip, take, nil)
+	q := ""
+	if query != nil {
+		q = *query
+	}
+	r, err := s.catalogClient.GetProducts(ctx, skip, take, nil, q)
 	if err != nil {
 		log.Println(err)
 		return nil, err
