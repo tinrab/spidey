@@ -18,7 +18,6 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	Account_orders(ctx context.Context, obj *Account) ([]Order, error)
 	Mutation_createAccount(ctx context.Context, account AccountInput) (*Account, error)
 	Mutation_createProduct(ctx context.Context, product ProductInput) (*Product, error)
 	Mutation_createOrder(ctx context.Context, order OrderInput) (*Order, error)
@@ -127,42 +126,23 @@ func (ec *executionContext) _Account_name(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Account_orders(ctx context.Context, field graphql.CollectedField, obj *Account) graphql.Marshaler {
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Account",
-		Args:   nil,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Account_orders(ctx, obj)
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.([]Order)
-		arr1 := graphql.Array{}
-		for idx1 := range res {
-			arr1 = append(arr1, func() graphql.Marshaler {
-				rctx := graphql.GetResolverContext(ctx)
-				rctx.PushIndex(idx1)
-				defer rctx.Pop()
-				return ec._Order(ctx, field.Selections, &res[idx1])
-			}())
-		}
-		return arr1
-	})
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "Account"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Orders
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			rctx := graphql.GetResolverContext(ctx)
+			rctx.PushIndex(idx1)
+			defer rctx.Pop()
+			return ec._Order(ctx, field.Selections, &res[idx1])
+		}())
+	}
+	return arr1
 }
 
 var mutationImplementors = []string{"Mutation"}
@@ -1532,7 +1512,9 @@ func UnmarshalOrderInput(v interface{}) (OrderInput, error) {
 			var err error
 			var rawIf1 []interface{}
 			if v != nil {
-				rawIf1 = v.([]interface{})
+				if tmp1, ok := v.([]interface{}); ok {
+					rawIf1 = tmp1
+				}
 			}
 			it.Products = make([]OrderProductInput, len(rawIf1))
 			for idx1 := range rawIf1 {

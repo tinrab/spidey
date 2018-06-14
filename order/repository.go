@@ -102,6 +102,7 @@ func (r *postgresRepository) GetOrdersForAccount(ctx context.Context, accountID 
 	orderedProduct := &OrderedProduct{}
 	products := []OrderedProduct{}
 
+	// Scan rows into Order structs
 	for rows.Next() {
 		if err = rows.Scan(
 			&order.ID,
@@ -134,7 +135,7 @@ func (r *postgresRepository) GetOrdersForAccount(ctx context.Context, accountID 
 		*lastOrder = *order
 	}
 
-	// Add last order (or first lol)
+	// Add last order (or first :D)
 	if lastOrder != nil {
 		newOrder := Order{
 			ID:         lastOrder.ID,

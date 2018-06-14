@@ -72,12 +72,15 @@ func (s *grpcServer) PostOrder(
 		return nil, err
 	}
 
+	// Construct products
 	products := []OrderedProduct{}
-	totalPrice := 0.0
 	for _, p := range orderedProducts {
 		product := OrderedProduct{
-			ID:       p.ID,
-			Quantity: 0,
+			ID:          p.ID,
+			Quantity:    0,
+			Price:       p.Price,
+			Name:        p.Name,
+			Description: p.Description,
 		}
 		for _, rp := range r.Products {
 			if rp.ProductId == p.ID {
@@ -88,13 +91,11 @@ func (s *grpcServer) PostOrder(
 
 		if product.Quantity != 0 {
 			products = append(products, product)
-			// Calculate total price
-			totalPrice += p.Price * float64(product.Quantity)
 		}
 	}
 
-	// Call service
-	order, err := s.service.PostOrder(ctx, r.AccountId, totalPrice, products)
+	// Call service implementation
+	order, err := s.service.PostOrder(ctx, r.AccountId, products)
 	if err != nil {
 		log.Println(err)
 		return nil, err

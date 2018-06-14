@@ -24,8 +24,8 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type Account struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -70,7 +70,7 @@ func (m *Account) GetName() string {
 }
 
 type PostAccountRequest struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -108,7 +108,7 @@ func (m *PostAccountRequest) GetName() string {
 }
 
 type PostAccountResponse struct {
-	Account              *Account `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	Account              *Account `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -146,7 +146,7 @@ func (m *PostAccountResponse) GetAccount() *Account {
 }
 
 type GetAccountRequest struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -184,7 +184,7 @@ func (m *GetAccountRequest) GetId() string {
 }
 
 type GetAccountResponse struct {
-	Account              *Account `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	Account              *Account `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -222,8 +222,8 @@ func (m *GetAccountResponse) GetAccount() *Account {
 }
 
 type GetAccountsRequest struct {
-	Skip                 uint64   `protobuf:"varint,1,opt,name=skip" json:"skip,omitempty"`
-	Take                 uint64   `protobuf:"varint,2,opt,name=take" json:"take,omitempty"`
+	Skip                 uint64   `protobuf:"varint,1,opt,name=skip,proto3" json:"skip,omitempty"`
+	Take                 uint64   `protobuf:"varint,2,opt,name=take,proto3" json:"take,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -268,7 +268,7 @@ func (m *GetAccountsRequest) GetTake() uint64 {
 }
 
 type GetAccountsResponse struct {
-	Accounts             []*Account `protobuf:"bytes,1,rep,name=accounts" json:"accounts,omitempty"`
+	Accounts             []*Account `protobuf:"bytes,1,rep,name=accounts,proto3" json:"accounts,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
 	XXX_unrecognized     []byte     `json:"-"`
 	XXX_sizecache        int32      `json:"-"`
