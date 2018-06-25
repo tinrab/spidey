@@ -3,7 +3,7 @@ package graph
 import (
 	context "context"
 	"log"
-	time "time"
+	"time"
 )
 
 func (s *GraphQLServer) Account_orders(ctx context.Context, obj *Account) ([]Order, error) {
@@ -39,10 +39,6 @@ func (s *GraphQLServer) Account_orders(ctx context.Context, obj *Account) ([]Ord
 	return orders, nil
 }
 
-func (s *GraphQLServer) Order_products(ctx context.Context, obj *Order) ([]OrderedProduct, error) {
-	return obj.Products, nil
-}
-
 func (s *GraphQLServer) Query_accounts(ctx context.Context, pagination *PaginationInput, id *string) ([]Account, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
@@ -74,7 +70,15 @@ func (s *GraphQLServer) Query_accounts(ctx context.Context, pagination *Paginati
 
 	accounts := []Account{}
 	for _, a := range r {
-		accounts = append(accounts, Account{ID: a.ID, Name: a.Name})
+		account := Account{
+			ID:   a.ID,
+			Name: a.Name,
+		}
+		account.Orders, err = s.Account_orders(ctx, &account)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, account)
 	}
 
 	return accounts, nil

@@ -4,7 +4,7 @@ import (
 	context "context"
 	"errors"
 	"log"
-	time "time"
+	"time"
 
 	"github.com/tinrab/spidey/order"
 )
