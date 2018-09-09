@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/kelseyhightower/envconfig"
-	"github.com/tinrab/spidey/graphql/graph"
-	"github.com/vektah/gqlgen/handler"
+  "github.com/kelseyhightower/envconfig"
+  "github.com/tinrab/spidey/graphql/graph"
+  "github.com/99designs/gqlgen/handler"
+  "log"
+  "net/http"
 )
 
 type Config struct {
@@ -26,8 +25,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.Handle("/graphql", handler.GraphQL(graph.MakeExecutableSchema(s)))
+
+	http.Handle("/graphql", handler.GraphQL(s.ToExecutableSchema()))
 	http.Handle("/playground", handler.Playground("Spidey", "/graphql"))
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+  log.Fatal(http.ListenAndServe(":8080", nil))
 }
