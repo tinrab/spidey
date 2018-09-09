@@ -7,7 +7,7 @@ The underlying source code for the article [Using GraphQL API Gateway for Micros
 ## Build
 
 ```
-$ vgo mod -vendor
+$ go mod vendor
 $ docker-compose up -d --build
 ```
 
