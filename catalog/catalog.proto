@@ -2,43 +2,46 @@ syntax = "proto3";
 package pb;
 
 message Product {
-  string id = 1;
-  string name = 2;
-  string description = 3;
-  double price = 4;
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
 }
 
 message PostProductRequest {
-  string name = 1;
-  string description = 2;
-  double price = 3;
+    string name = 1;
+    string description = 2;
+    double price = 3;
 }
 
 message PostProductResponse {
-  Product product = 1;
+    Product product = 1;
 }
 
 message GetProductRequest {
-  string id = 1;
+    string id = 1;
 }
 
 message GetProductResponse {
-  Product product = 1;
+    Product product = 1;
 }
 
 message GetProductsRequest {
-  uint64 skip = 1;
-  uint64 take = 2;
-  repeated string ids = 3;
-  string query = 4;
+    uint64 skip = 1;
+    uint64 take = 2;
+    repeated string ids = 3;
+    string query = 4;
 }
 
 message GetProductsResponse {
-  repeated Product products = 1;
+    repeated Product products = 1;
 }
 
 service CatalogService {
-  rpc PostProduct (PostProductRequest) returns (PostProductResponse) {}
-  rpc GetProduct (GetProductRequest) returns (GetProductResponse) {}
-  rpc GetProducts (GetProductsRequest) returns (GetProductsResponse) {}
+    rpc PostProduct (PostProductRequest) returns (PostProductResponse) {
+    }
+    rpc GetProduct (GetProductRequest) returns (GetProductResponse) {
+    }
+    rpc GetProducts (GetProductsRequest) returns (GetProductsResponse) {
+    }
 }

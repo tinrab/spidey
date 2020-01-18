@@ -3,6 +3,7 @@ package order
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -57,8 +58,8 @@ func (s *grpcServer) PostOrder(
 	// Check if account exists
 	_, err := s.accountClient.GetAccount(ctx, r.AccountId)
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		log.Println("Error getting account: ", err)
+		return nil, errors.New("account not found")
 	}
 
 	// Get ordered products
@@ -68,8 +69,8 @@ func (s *grpcServer) PostOrder(
 	}
 	orderedProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		log.Println("Error getting products: ",err)
+		return nil, errors.New("products not found")
 	}
 
 	// Construct products
@@ -97,8 +98,8 @@ func (s *grpcServer) PostOrder(
 	// Call service implementation
 	order, err := s.service.PostOrder(ctx, r.AccountId, products)
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		log.Println("Error posting order: ", err)
+		return nil, errors.New("could not post order")
 	}
 
 	// Make response order
@@ -147,7 +148,7 @@ func (s *grpcServer) GetOrdersForAccount(
 	}
 	products, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
 	if err != nil {
-		log.Println(err)
+		log.Println("Error getting account products: ", err)
 		return nil, err
 	}
 

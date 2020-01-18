@@ -2,52 +2,54 @@ syntax = "proto3";
 package pb;
 
 message Order {
-  message OrderProduct {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-    double price = 4;
-    uint32 quantity = 5;
-  }
+    message OrderProduct {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+        double price = 4;
+        uint32 quantity = 5;
+    }
 
-  string id = 1;
-  bytes createdAt = 2;
-  string accountId = 3;
-  double totalPrice = 4;
-  repeated OrderProduct products = 5;
+    string id = 1;
+    bytes createdAt = 2;
+    string accountId = 3;
+    double totalPrice = 4;
+    repeated OrderProduct products = 5;
 }
 
 message PostOrderRequest {
-  message OrderProduct {
-    string productId = 2;
-    uint32 quantity = 3;
-  }
+    message OrderProduct {
+        string productId = 2;
+        uint32 quantity = 3;
+    }
 
-  string accountId = 2;
-  repeated OrderProduct products = 4;
+    string accountId = 2;
+    repeated OrderProduct products = 4;
 }
 
 message PostOrderResponse {
-  Order order = 1;
+    Order order = 1;
 }
 
 message GetOrderRequest {
-  string id = 1;
+    string id = 1;
 }
 
 message GetOrderResponse {
-  Order order = 1;
+    Order order = 1;
 }
 
 message GetOrdersForAccountRequest {
-  string accountId = 1;
+    string accountId = 1;
 }
 
 message GetOrdersForAccountResponse {
-  repeated Order orders = 1;
+    repeated Order orders = 1;
 }
 
 service OrderService {
-  rpc PostOrder (PostOrderRequest) returns (PostOrderResponse) {}
-  rpc GetOrdersForAccount (GetOrdersForAccountRequest) returns (GetOrdersForAccountResponse) {}
+    rpc PostOrder (PostOrderRequest) returns (PostOrderResponse) {
+    }
+    rpc GetOrdersForAccount (GetOrdersForAccountRequest) returns (GetOrdersForAccountResponse) {
+    }
 }

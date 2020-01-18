@@ -2,37 +2,40 @@ syntax = "proto3";
 package pb;
 
 message Account {
-  string id = 1;
-  string name = 2;
+    string id = 1;
+    string name = 2;
 }
 
 message PostAccountRequest {
-  string name = 1;
+    string name = 1;
 }
 
 message PostAccountResponse {
-  Account account = 1;
+    Account account = 1;
 }
 
 message GetAccountRequest {
-  string id = 1;
+    string id = 1;
 }
 
 message GetAccountResponse {
-  Account account = 1;
+    Account account = 1;
 }
 
 message GetAccountsRequest {
-  uint64 skip = 1;
-  uint64 take = 2;
+    uint64 skip = 1;
+    uint64 take = 2;
 }
 
 message GetAccountsResponse {
-  repeated Account accounts = 1;
+    repeated Account accounts = 1;
 }
 
 service AccountService {
-  rpc PostAccount (PostAccountRequest) returns (PostAccountResponse) {}
-  rpc GetAccount (GetAccountRequest) returns (GetAccountResponse) {}
-  rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse) {}
+    rpc PostAccount (PostAccountRequest) returns (PostAccountResponse) {
+    }
+    rpc GetAccount (GetAccountRequest) returns (GetAccountResponse) {
+    }
+    rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse) {
+    }
 }
